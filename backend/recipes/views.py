@@ -1,12 +1,15 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from .models import Recipe, Ingredient
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from .models import Recipe, Ingredient, Favorite
 from .serializers import (RecipeSerializer,
+                          ShortRecipeSerializer,
                           RecipeCreateUpdateSerializer,
                           IngredientSerializer)
 from .permissions import IsAuthorOrReadOnly
-from django_filters.rest_framework import DjangoFilterBackend
 from .filters import IngredientFilter
 
 
@@ -15,8 +18,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
 
     def get_serializer_class(self):
+        print(self.action)
         if self.action in ('create', 'update', 'partial_update'):
             return RecipeCreateUpdateSerializer
+        elif self.action == 'favorite':
+            return ShortRecipeSerializer
         return RecipeSerializer
 
     def perform_create(self, serializer):
@@ -41,6 +47,37 @@ class RecipeViewSet(viewsets.ModelViewSet):
         output_serializer = RecipeSerializer(recipe,
                                              context={'request': request})
         return Response(output_serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        methods=['post'],
+        detail=True,
+        permission_classes=[IsAuthenticated],
+    )
+    def favorite(self, request, pk=None):
+        user = request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+        if Favorite.objects.filter(user=user, recipe=recipe).exists():
+            return Response(
+                {'errors': 'Рецепт уже в избранном'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        Favorite.objects.create(user=user, recipe=recipe)
+        serializer = ShortRecipeSerializer(recipe,
+                                           context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @favorite.mapping.delete
+    def delete_favorite(self, request, pk=None):
+        user = request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+        favorite = Favorite.objects.filter(user=user, recipe=recipe)
+        if not favorite.exists():
+            return Response(
+                {'errors': 'Рецепт не был в избранном'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
