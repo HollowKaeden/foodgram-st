@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Recipe, RecipeIngredient, Favorite, ShoppingCart
+from .models import (Recipe, Ingredient, RecipeIngredient,
+                     Favorite, ShoppingCart)
 from users.serializers import UserSerializer
 from api.serializers import Base64ImageField
 
@@ -95,3 +96,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('ingredients', 'image', 'name', 'text', 'cooking_time')
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = ('id', 'name', 'measurement_unit')
