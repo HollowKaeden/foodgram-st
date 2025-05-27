@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import (Recipe, Ingredient, RecipeIngredient,
+                     Favorite, ShoppingCart)
 
-# Register your models here.
+
+admin.site.register((Recipe, Ingredient, RecipeIngredient,
+                     Favorite, ShoppingCart))
