@@ -27,7 +27,8 @@ class Recipe(models.Model):
         verbose_name='Ингредиенты'
     )
     cooking_time = models.PositiveIntegerField('Время приготовления',
-                                               validators=(MinValueValidator,))
+                                               validators=(
+                                                   MinValueValidator(1),))
     created_at = models.DateTimeField('Дата публикации', auto_now_add=True)
 
     class Meta:
@@ -68,7 +69,8 @@ class Favorite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        verbose_name='Рецепт в любимом'
+        verbose_name='Рецепт в любимом',
+        related_name='favorite'
     )
 
 
@@ -81,5 +83,6 @@ class ShoppingCart(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        verbose_name='Рецепт в корзине'
+        verbose_name='Рецепт в корзине',
+        related_name='shoppingcart'
     )

@@ -61,7 +61,7 @@ class IngredientAmountSerializer(serializers.Serializer):
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
-    ingredients = IngredientAmountSerializer(many=True)
+    ingredients = IngredientAmountSerializer(many=True, required=True)
     image = Base64ImageField()
 
     def create_ingredients(self, recipe, ingredients):
@@ -92,6 +92,27 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return RecipeSerializer(instance, context=self.context).data
+
+    def validate_ingredients(self, value):
+        if not value:
+            raise serializers.ValidationError('Нужно указать хотя '
+                                              'бы один ингредиент')
+
+        ingredient_ids = [item['id'] for item in value]
+        if len(ingredient_ids) != len(set(ingredient_ids)):
+            raise serializers.ValidationError('Ингредиенты не '
+                                              'должны повторяться')
+
+        existing_ids = set(
+            Ingredient.objects.filter(id__in=ingredient_ids)
+                              .values_list('id', flat=True)
+        )
+        missing_ids = set(ingredient_ids) - existing_ids
+        if missing_ids:
+            raise serializers.ValidationError('Неправильно указан '
+                                              'ID ингредиентов')
+
+        return value
 
     class Meta:
         model = Recipe

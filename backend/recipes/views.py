@@ -11,12 +11,14 @@ from .serializers import (RecipeSerializer,
                           IngredientSerializer)
 from api.serializers import ShortRecipeSerializer
 from .permissions import IsAuthorOrReadOnly
-from .filters import IngredientFilter
+from .filters import RecipeFilter, IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):

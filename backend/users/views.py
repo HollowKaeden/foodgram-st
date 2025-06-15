@@ -82,8 +82,17 @@ class UserViewSet(DjoserUserViewSet):
             )
 
         Subscription.objects.create(subscriber=user, author=author)
-        serializer = SubscriptionsSerializer(author,
-                                             context={'request': request})
+
+        recipes_limit = request.query_params.get('recipes_limit')
+        try:
+            recipes_limit = int(recipes_limit)
+        except (TypeError, ValueError):
+            recipes_limit = None
+
+        context = self.get_serializer_context()
+        context['recipes_limit'] = recipes_limit
+
+        serializer = SubscriptionsSerializer(author, context=context)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
