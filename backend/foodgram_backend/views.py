@@ -9,4 +9,4 @@ def short_recipe_view(request, code):
     except ValueError:
         return JsonResponse({'errors': 'Неправильный формат кода'}, status=400)
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    return redirect(f'/api/recipes/{recipe.id}/')
+    return redirect(f'/recipes/{recipe.id}/')
