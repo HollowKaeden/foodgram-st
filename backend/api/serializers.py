@@ -2,6 +2,7 @@ import base64
 import uuid
 from django.core.files.base import ContentFile
 from rest_framework import serializers
+from recipes.models import Recipe
 
 
 class Base64ImageField(serializers.ImageField):
@@ -12,3 +13,14 @@ class Base64ImageField(serializers.ImageField):
             name = f'{uuid.uuid4()}.{ext}'
             data = ContentFile(base64.b64decode(imgstr), name=name)
         return super().to_internal_value(data)
+
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time'
+        )

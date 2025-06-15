@@ -6,9 +6,9 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Recipe, Ingredient, Favorite
 from .serializers import (RecipeSerializer,
-                          ShortRecipeSerializer,
                           RecipeCreateUpdateSerializer,
                           IngredientSerializer)
+from api.serializers import ShortRecipeSerializer
 from .permissions import IsAuthorOrReadOnly
 from .filters import IngredientFilter
 

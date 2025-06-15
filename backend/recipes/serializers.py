@@ -55,17 +55,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
 
-class ShortRecipeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'name',
-            'image',
-            'cooking_time'
-        )
-
-
 class IngredientAmountSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     amount = serializers.IntegerField(min_value=1)

@@ -1,7 +1,6 @@
 from django.urls import path
-from djoser.views import UserViewSet
 from rest_framework.permissions import IsAuthenticated
-from .views import AvatarViewSet
+from .views import UserViewSet
 
 
 user_list = UserViewSet.as_view(
@@ -30,14 +29,19 @@ set_password = UserViewSet.as_view(
     }
 )
 
+avatar = UserViewSet.as_view(
+    {
+        'put': 'avatar',
+        'delete': 'avatar'
+    },
+    permission_classes=[IsAuthenticated]
+)
+
 
 urlpatterns = [
     path('', user_list, name='user-list'),
     path('<int:id>/', user_detail, name='user-detail'),
     path('me/', user_me, name='user-me'),
-    path('me/avatar',
-         AvatarViewSet.as_view({'put': 'avatar',
-                                'delete': 'avatar'}),
-         name='avatar'),
+    path('me/avatar', avatar, name='avatar'),
     path('set_password/', set_password, name='user-set-password'),
 ]

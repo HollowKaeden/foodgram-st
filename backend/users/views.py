@@ -1,15 +1,14 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 import uuid
 import base64
 from django.core.files.base import ContentFile
+from djoser.views import UserViewSet as DjoserUserViewSet
 
 
-class AvatarViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
-
-    @action(detail=False, methods=['put', 'delete'])
+class UserViewSet(DjoserUserViewSet):
+    @action(detail=False, methods=['put', 'delete'], url_path='me/avatar')
     def avatar(self, request):
         user = request.user
 
