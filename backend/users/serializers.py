@@ -42,10 +42,24 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionsSerializer(UserSerializer):
-    recipes = ShortRecipeSerializer(many=True, read_only=True)
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
+    def get_recipes(self, obj):
+        recipes_limit = self.context.get('recipes_limit')
+
+        recipes = obj.recipes.all()
+        if recipes_limit:
+            recipes = recipes[:recipes_limit]
+
+        serializer = ShortRecipeSerializer(recipes, many=True,
+                                           context=self.context)
+        return serializer.data
+
     def get_recipes_count(self, obj):
+        recipes_limit = self.context.get('recipes_limit')
+        if recipes_limit:
+            return min(recipes_limit, obj.recipes.count())
         return obj.recipes.count()
 
     class Meta:

@@ -37,11 +37,28 @@ avatar = UserViewSet.as_view(
     permission_classes=[IsAuthenticated]
 )
 
+subscriptions = UserViewSet.as_view(
+    {
+        'get': 'subscriptions'
+    },
+    permission_classes=[IsAuthenticated]
+)
+
+subscribe = UserViewSet.as_view(
+    {
+        'post': 'subscribe',
+        'delete': 'delete_subscription'
+    },
+    permission_classes=[IsAuthenticated]
+)
+
 
 urlpatterns = [
     path('', user_list, name='user-list'),
     path('<int:id>/', user_detail, name='user-detail'),
     path('me/', user_me, name='user-me'),
     path('me/avatar', avatar, name='avatar'),
+    path('subscriptions/', subscriptions, name='subscriptions'),
+    path('<int:id>/subscribe/', subscribe, name='subscribe'),
     path('set_password/', set_password, name='user-set-password'),
 ]
