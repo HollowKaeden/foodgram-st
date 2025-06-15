@@ -31,27 +31,27 @@ class Recipe(models.Model):
                                                    MinValueValidator(1),))
     created_at = models.DateTimeField('Дата публикации', auto_now_add=True)
 
-    def __str__(self):
-        return (f'{self.name} - '
-                f'{self.author.first_name} {self.author.last_name}')
-
     class Meta:
         ordering = ('-created_at',)
         verbose_name = 'рецепт'
         verbose_name_plural = 'Рецепты'
+
+    def __str__(self):
+        return (f'{self.name} - '
+                f'{self.author.first_name} {self.author.last_name}')
 
 
 class Ingredient(models.Model):
     name = models.CharField('Название', max_length=64, unique=True)
     measurement_unit = models.CharField('Единица измерения', max_length=16)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ('name',)
         verbose_name = 'ингредиент'
         verbose_name_plural = 'Ингредиенты'
+
+    def __str__(self):
+        return self.name
 
 
 class RecipeIngredient(models.Model):
@@ -70,12 +70,12 @@ class RecipeIngredient(models.Model):
         'Количество', validators=(MinValueValidator(1),)
     )
 
-    def __str__(self):
-        return f'{self.recipe} - {self.ingredient}: {self.amount}'
-
     class Meta:
         verbose_name = 'связь рецепта с ингредиентом'
         verbose_name_plural = 'Связи рецептов и ингредиентов'
+
+    def __str__(self):
+        return f'{self.recipe} - {self.ingredient}: {self.amount}'
 
 
 class Favorite(models.Model):
@@ -91,12 +91,12 @@ class Favorite(models.Model):
         related_name='favorite'
     )
 
-    def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name} - {self.recipe}'
-
     class Meta:
         verbose_name = 'любимое'
         verbose_name_plural = 'Любимые'
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name} - {self.recipe}'
 
 
 class ShoppingCart(models.Model):
@@ -112,9 +112,9 @@ class ShoppingCart(models.Model):
         related_name='shoppingcart'
     )
 
-    def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name} - {self.recipe}'
-
     class Meta:
         verbose_name = 'корзина'
         verbose_name_plural = 'Корзина'
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name} - {self.recipe}'

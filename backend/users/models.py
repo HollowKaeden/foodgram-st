@@ -36,10 +36,10 @@ class Subscription(models.Model):
         related_name='subscribers'
     )
 
-    def __str__(self):
-        return (f'{self.subscriber.first_name} {self.subscriber.last_name} - '
-                f'{self.author.first_name} {self.author.last_name}')
-
     class Meta:
         verbose_name = 'подписка'
         verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        return (f'{self.subscriber.first_name} {self.subscriber.last_name} - '
+                f'{self.author.first_name} {self.author.last_name}')
