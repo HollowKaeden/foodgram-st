@@ -11,11 +11,17 @@ class MyUser(AbstractUser):
     last_name = models.CharField('Фамилия', max_length=150, blank=False)
     avatar = models.ImageField(
         "Аватар", upload_to="users/",
-        blank=True, null=True
+        blank=True, null=True,
+        default='users/default_avatar.jpg'
     )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
+
+    def save(self, *args, **kwargs):
+        if not self.avatar:
+            self.avatar = 'users/default_avatar.jpg'
+        super().save(*args, **kwargs)
 
 
 class Subscription(models.Model):
