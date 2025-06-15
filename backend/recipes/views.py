@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from django.urls import reverse
 from .models import Recipe, Ingredient, Favorite
 from .serializers import (RecipeSerializer,
                           RecipeCreateUpdateSerializer,
@@ -18,7 +19,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrReadOnly,)
 
     def get_serializer_class(self):
-        print(self.action)
         if self.action in ('create', 'update', 'partial_update'):
             return RecipeCreateUpdateSerializer
         elif self.action == 'favorite':
@@ -78,6 +78,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         favorite.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['get'], url_path='get-link')
+    def get_link(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, pk=pk)
+
+        hex_id = format(recipe.id, 'x')
+        short_link = request.build_absolute_uri(
+            reverse('short-link', kwargs={'code': hex_id})
+        )
+        return Response({'short-link': short_link}, status=status.HTTP_200_OK)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
