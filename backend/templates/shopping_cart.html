@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список покупок</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            margin: 40px;
+            line-height: 1.6;
+        }
+        h1 {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #000;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .text {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+    <body>
+        <h1>Список покупок</h1>
+        <div class="shopping-list">
+            {% for name, values in cart.items %}
+                <div class="item">
+                    <div class="checkbox"></div>
+                    <div class="text">{{ name }} — {{ values.0 }} {{ values.1 }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </body>
+</html>
