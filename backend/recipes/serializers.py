@@ -85,6 +85,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
+        instance.save()
+
         if ingredients is not None:
             instance.recipe_ingredients.all().delete()
             self.create_ingredients(instance, ingredients)
