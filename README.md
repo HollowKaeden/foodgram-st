@@ -34,15 +34,18 @@ docker-compose up --build
 
 ## 4. Доступ к приложению
 
-Основной сайт: http://localhost:8000/
-Админ-панель Django: http://localhost:8000/admin/
+- **Основной сайт:**  
+  http://localhost:8000/
+
+- **Админ-панель Django:**  
+  http://localhost:8000/admin/
 
 ## 5. Данные для входа
 
-Данные для входа в аккаунт администратора:
-admin@example.com
-s3cretpassword
+- **Администратор:**  
+  Логин: `admin@example.com`  
+  Пароль: `s3cretpassword`
 
-Данные для входа в аккаунт пользователя:
-iivanov@example.com
-ivpassword
+- **Обычный пользователь:**  
+  Логин: `iivanov@example.com`  
+  Пароль: `ivpassword`
