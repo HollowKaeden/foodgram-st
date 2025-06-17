@@ -52,7 +52,7 @@ class Ingredient(models.Model):
             models.UniqueConstraint(
                 fields=('name', 'measurement_unit'),
                 name='unique_name_unit_relation'
-            )
+            ),
         )
 
     def __str__(self):
@@ -102,7 +102,7 @@ class UserRecipeLink(models.Model):
             models.UniqueConstraint(
                 fields=('user', 'recipe'),
                 name='unique_user_recipe_relation'
-            )
+            ),
         )
 
     def __str__(self):
