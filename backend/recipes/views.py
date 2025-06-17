@@ -2,9 +2,10 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from django.urls import reverse
+from django.http import Http404
 from .models import Recipe, Ingredient, Favorite, ShoppingCart
 from .serializers import (RecipeSerializer,
                           RecipeCreateUpdateSerializer,
@@ -150,3 +151,9 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = IngredientFilter
     permission_classes = (AllowAny,)
     pagination_class = None
+
+
+def short_recipe_view(request, recipe_id):
+    if not Recipe.objects.filter(id=recipe_id).exists():
+        raise Http404(f'Рецепт с id {recipe_id} не найден')
+    return redirect(f'/recipes/{recipe_id}/')
