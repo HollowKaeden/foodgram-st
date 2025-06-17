@@ -1,5 +1,4 @@
 from django.urls import path, include
-from djoser.views import TokenCreateView, TokenDestroyView
 
 
 urlpatterns = [

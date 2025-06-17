@@ -23,6 +23,9 @@ class MyUser(AbstractUser):
             self.avatar = 'users/default_avatar.jpg'
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.email
+
 
 class Subscription(models.Model):
     subscriber = models.ForeignKey(

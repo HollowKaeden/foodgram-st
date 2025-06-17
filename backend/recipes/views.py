@@ -12,7 +12,7 @@ from .serializers import (RecipeSerializer,
                           IngredientSerializer)
 from api.serializers import ShortRecipeSerializer
 from .permissions import IsAuthorOrReadOnly
-from .filters import RecipeFilter, IngredientFilter
+from api.filters import RecipeFilter, IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
