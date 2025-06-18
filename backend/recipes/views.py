@@ -6,12 +6,12 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from django.urls import reverse
 from django.http import Http404
-from .models import Recipe, Ingredient, Favorite, ShoppingCart
-from .serializers import (RecipeSerializer,
-                          RecipeCreateUpdateSerializer,
-                          IngredientSerializer)
+from recipes.models import Recipe, Ingredient, Favorite, ShoppingCart
+from api.serializers import (RecipeSerializer,
+                             RecipeCreateUpdateSerializer,
+                             IngredientSerializer)
 from api.serializers import ShortRecipeSerializer
-from .permissions import IsAuthorOrReadOnly
+from api.permissions import IsAuthorOrReadOnly
 from api.filters import RecipeFilter, IngredientFilter
 
 
