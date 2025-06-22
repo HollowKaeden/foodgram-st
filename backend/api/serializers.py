@@ -3,7 +3,7 @@ from recipes.models import (Recipe, Ingredient, RecipeIngredient,
                             Favorite, ShoppingCart)
 from drf_extra_fields.fields import Base64ImageField
 from django.contrib.auth import get_user_model
-from users.models import Subscription
+from recipes.models import Subscription
 from djoser.serializers import UserSerializer as DjoserUserSerializer
 
 

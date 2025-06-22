@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import short_recipe_view
+from recipes.views import short_recipe_view
 
 
 urlpatterns = [

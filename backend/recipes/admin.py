@@ -1,9 +1,16 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from django.utils.safestring import mark_safe
 from django.db.models import Count
-from recipes.models import (Recipe, Ingredient, RecipeIngredient,
-                            Favorite, ShoppingCart)
+from recipes.models import (CustomUser, Recipe, Ingredient, RecipeIngredient,
+                            Favorite, ShoppingCart, Subscription)
 from api.filters import CookingTimeFilter, IsUsedInRecipesFilter
+
+
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    model = CustomUser
+    search_fields = ('email', 'username')
 
 
 @admin.register(Recipe)
@@ -69,4 +76,9 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
     pass

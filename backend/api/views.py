@@ -17,7 +17,7 @@ import uuid
 import base64
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
-from users.models import Subscription
+from recipes.models import Subscription
 from api.serializers import SubscriptionSerializer
 
 
