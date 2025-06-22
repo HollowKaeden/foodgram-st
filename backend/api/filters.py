@@ -17,7 +17,7 @@ class RecipeFilter(django_filters.FilterSet):
         if not user.is_authenticated:
             return recipes.none() if value else recipes
         if int(value):
-            return recipes.filter(favorite__user=user)
+            return recipes.filter(favorites__user=user)
         return recipes
 
     def filter_shopping_cart(self, recipes, name, value):
@@ -25,7 +25,7 @@ class RecipeFilter(django_filters.FilterSet):
         if not user.is_authenticated:
             return recipes.none() if value else recipes
         if int(value):
-            return recipes.filter(shoppingcart__user=user)
+            return recipes.filter(shopping_carts__user=user)
         return recipes
 
     class Meta:

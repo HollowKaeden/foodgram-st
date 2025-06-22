@@ -5,7 +5,7 @@ from django.core.validators import RegexValidator
 
 
 username_validator = RegexValidator(
-    regex=r'^[\w.@+-]+\z',
+    regex=r'^[\w.@+-]+\Z',
     message='Имя пользователя может содержать '
             'только буквы, цифры и символы @/./+/-/_'
 )
@@ -68,7 +68,8 @@ class Recipe(models.Model):
         max_length=256
     )
     image = models.ImageField(
-        'Изображение', upload_to='recipes/images/'
+        'Изображение', upload_to='recipes/images/',
+        blank=False, null=False
     )
     text = models.TextField('Описание')
     ingredients = models.ManyToManyField(

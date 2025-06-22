@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework import DjangoFilterBackend
@@ -26,9 +26,13 @@ User = get_user_model()
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+
+    def get_permissions(self):
+        if self.request.method not in SAFE_METHODS:
+            return (IsAuthenticated(), IsAuthorOrReadOnly())
+        return (IsAuthorOrReadOnly(),)
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
@@ -36,9 +40,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         elif self.action == 'favorite':
             return ShortRecipeSerializer
         return RecipeSerializer
-
-    def perform_create(self, serializer):
-        return serializer.save()
 
     @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request, pk=None):
@@ -73,12 +74,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def favorite(self, request, pk=None):
-        self._add_user_recipe_relation(Favorite, request.user, pk,
-                                       f'Рецепт с id={pk} уже в избранном')
+        return self._add_user_recipe_relation(Favorite, request.user, pk,
+                                              f'Рецепт с id={pk} уже '
+                                              f'в избранном')
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):
-        self._delete_user_recipe_relation(Favorite, request.user, pk)
+        return self._delete_user_recipe_relation(Favorite, request.user, pk)
 
     @action(
         methods=['post'],
@@ -87,12 +89,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path='shopping_cart'
     )
     def add_to_cart(self, request, pk=None):
-        self._add_user_recipe_relation(ShoppingCart, request.user, pk,
-                                       f'Рецепт с id={pk} уже в корзине')
+        return self._add_user_recipe_relation(ShoppingCart, request.user, pk,
+                                              f'Рецепт с id={pk} уже '
+                                              f'в корзине')
 
     @add_to_cart.mapping.delete
     def delete_from_cart(self, request, pk=None):
-        self._delete_user_recipe_relation(ShoppingCart, request.user, pk)
+        return self._delete_user_recipe_relation(ShoppingCart, request.user,
+                                                 pk)
 
     @action(detail=False, methods=['get'], url_path='download_shopping_cart',
             permission_classes=[IsAuthenticated])

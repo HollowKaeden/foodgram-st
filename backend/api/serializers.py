@@ -157,26 +157,28 @@ class IngredientAmountSerializer(serializers.Serializer):
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     ingredients = IngredientAmountSerializer(many=True, required=True)
-    image = Base64ImageField()
+    image = Base64ImageField(required=True, allow_null=False)
     cooking_time = serializers.IntegerField(min_value=1)
 
     def create_ingredients(self, recipe, ingredients):
         RecipeIngredient.objects.bulk_create(
             RecipeIngredient(
                 recipe=recipe,
-                ingredient_id=item['ingredient'],
+                ingredient=item['ingredient'],
                 amount=item['amount']
             ) for item in ingredients
         )
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
-        recipe = super().create(validated_data)
+        recipe = super().create({**validated_data,
+                                 'author': self.context['request'].user})
         self.create_ingredients(recipe, ingredients)
         return recipe
 
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients', None)
+        self.validate_ingredients(ingredients)
         instance = super().update(instance, validated_data)
 
         instance.recipe_ingredients.all().delete()
@@ -191,12 +193,17 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Нужно указать хотя '
                                               'бы один ингредиент')
 
-        ingredient_ids = [item['id'] for item in ingredients]
+        ingredient_ids = [item['ingredient'].id for item in ingredients]
         if len(ingredient_ids) != len(set(ingredient_ids)):
             raise serializers.ValidationError('Ингредиенты не '
                                               'должны повторяться')
 
         return ingredients
+
+    def validate_image(self, image):
+        if image in ("", None):
+            raise serializers.ValidationError('Изображение обязательно.')
+        return image
 
     class Meta:
         model = Recipe
