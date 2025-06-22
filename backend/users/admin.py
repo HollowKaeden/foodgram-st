@@ -1,12 +1,14 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import MyUser, Subscription
+from users.models import CustomUser, Subscription
 
 
-@admin.register(MyUser)
-class MyUserAdmin(UserAdmin):
-    model = MyUser
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    model = CustomUser
     search_fields = ('email', 'username')
 
 
-admin.site.register(Subscription)
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    pass

@@ -1,12 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy
+from django.core.validators import RegexValidator
 
 
-class MyUser(AbstractUser):
-    email = models.EmailField(gettext_lazy('email address'),
-                              blank=False,
-                              unique=True)
+username_validator = RegexValidator(
+    regex=r'^[\w.@+-]+\z',
+    message='Имя пользователя может содержать '
+            'только буквы, цифры и символы @/./+/-/_'
+)
+
+
+class CustomUser(AbstractUser):
+    username = models.CharField('Имя пользователя', max_length=150,
+                                unique=True, validators=(username_validator,))
+    email = models.EmailField('Электронная почта', max_length=254,
+                              blank=False, unique=True)
     first_name = models.CharField('Имя', max_length=150, blank=False)
     last_name = models.CharField('Фамилия', max_length=150, blank=False)
     avatar = models.ImageField(
@@ -29,17 +37,18 @@ class MyUser(AbstractUser):
 
 class Subscription(models.Model):
     subscriber = models.ForeignKey(
-        MyUser,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='subscriptions'
     )
     author = models.ForeignKey(
-        MyUser,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='subscribers'
     )
 
     class Meta:
+        ordering = ('subscriber', 'author')
         verbose_name = 'подписка'
         verbose_name_plural = 'Подписки'
 

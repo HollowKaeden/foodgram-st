@@ -1,8 +1,85 @@
 from rest_framework import serializers
 from recipes.models import (Recipe, Ingredient, RecipeIngredient,
                             Favorite, ShoppingCart)
-from users.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from django.contrib.auth import get_user_model
+from users.models import Subscription
+from djoser.serializers import UserSerializer as DjoserUserSerializer
+
+
+User = get_user_model()
+
+
+# Сериализаторы для пользователей и подписок
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField(required=True)
+
+    class Meta:
+        model = User
+        fields = ('avatar',)
+
+
+class UserSerializer(DjoserUserSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
+    def get_is_subscribed(self, author):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+
+        if not user or not user.is_authenticated:
+            return False
+        return Subscription.objects.filter(subscriber=user,
+                                           author=author).exists()
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'avatar'
+        )
+
+
+class SubscriptionSerializer(UserSerializer):
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    def get_recipes(self, author):
+        recipes_limit = self.context.get('recipes_limit')
+
+        recipes = author.recipes.all()
+        if recipes_limit:
+            recipes = recipes[:recipes_limit]
+
+        serializer = ShortRecipeSerializer(recipes, many=True,
+                                           context=self.context)
+        return serializer.data
+
+    def get_recipes_count(self, author):
+        recipes_limit = self.context.get('recipes_limit')
+        if recipes_limit:
+            return min(recipes_limit, author.recipes.count())
+        return author.recipes.count()
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+            'avatar'
+        )
 
 
 # Сериализаторы для рецептов и ингредиентов
