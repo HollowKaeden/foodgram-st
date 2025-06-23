@@ -3,7 +3,9 @@
 ## Автор
 
 [Артамонов Иван Алексеевич](https://github.com/HollowKaeden)
+
 Email: Vanya200373@yandex.ru
+
 Telegram: [@BlessNT](https://t.me/BlessNT)
 
 ## Стек технологий
@@ -40,7 +42,7 @@ DB_HOST=db
 DB_PORT=5432
 
 # Настройки Django
-SECRET_KEY='django-insecure-6cpoclrx#&)zu^kgaacx)arst*x=qwg-8%+4h(2=ak)lvbm2um'
+SECRET_KEY='django-secret-key'
 ALLOWED_HOSTS=backend,localhost,127.0.0.1
 DEBUG=False
 ```
