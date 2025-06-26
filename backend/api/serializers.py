@@ -1,10 +1,9 @@
 from rest_framework import serializers
-from recipes.models import (Recipe, Ingredient, RecipeIngredient,
-                            Favorite, ShoppingCart)
 from drf_extra_fields.fields import Base64ImageField
 from django.contrib.auth import get_user_model
-from recipes.models import Subscription
 from djoser.serializers import UserSerializer as DjoserUserSerializer
+from recipes.models import (Recipe, Ingredient, RecipeIngredient,
+                            Favorite, ShoppingCart, Subscription)
 
 
 User = get_user_model()
@@ -44,11 +43,13 @@ class UserSerializer(DjoserUserSerializer):
             'is_subscribed',
             'avatar'
         )
+        read_only_fields = fields
 
 
-class SubscriptionSerializer(UserSerializer):
+class UserWithRecipesSerializer(UserSerializer):
     recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
+    recipes_count = serializers.IntegerField(source='recipes.count',
+                                             read_only=True)
 
     def get_recipes(self, author):
         recipes_limit = self.context.get('recipes_limit')
@@ -60,12 +61,6 @@ class SubscriptionSerializer(UserSerializer):
         serializer = ShortRecipeSerializer(recipes, many=True,
                                            context=self.context)
         return serializer.data
-
-    def get_recipes_count(self, author):
-        recipes_limit = self.context.get('recipes_limit')
-        if recipes_limit:
-            return min(recipes_limit, author.recipes.count())
-        return author.recipes.count()
 
     class Meta:
         model = User
@@ -80,6 +75,11 @@ class SubscriptionSerializer(UserSerializer):
             'recipes_count',
             'avatar'
         )
+        read_only_fields = fields
+
+
+class SubscriptionQuerySerializer(serializers.Serializer):
+    recipes_limit = serializers.IntegerField(required=False, min_value=1)
 
 
 # Сериализаторы для рецептов и ингредиентов
@@ -107,9 +107,10 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time'
         )
+        read_only_fields = fields
 
 
-class RecipeSerializer(serializers.ModelSerializer):
+class RecipeReadSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     ingredients = IngredientInRecipeSerializer(source='recipe_ingredients',
                                                many=True, read_only=True)
@@ -171,6 +172,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
+        # Поле author не передаётся при запросе (только request.user),
+        # поэтому задаём его вручную при создании рецепта.
+        # Иначе возникнет ошибка, у рецепта не будет автора.
         recipe = super().create({**validated_data,
                                  'author': self.context['request'].user})
         self.create_ingredients(recipe, ingredients)
@@ -179,14 +183,13 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients', None)
         self.validate_ingredients(ingredients)
-        instance = super().update(instance, validated_data)
 
         instance.recipe_ingredients.all().delete()
         self.create_ingredients(instance, ingredients)
-        return instance
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
-        return RecipeSerializer(instance, context=self.context).data
+        return RecipeReadSerializer(instance, context=self.context).data
 
     def validate_ingredients(self, ingredients):
         if not ingredients:

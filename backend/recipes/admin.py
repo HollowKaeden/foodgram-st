@@ -4,7 +4,70 @@ from django.utils.safestring import mark_safe
 from django.db.models import Count
 from recipes.models import (CustomUser, Recipe, Ingredient, RecipeIngredient,
                             Favorite, ShoppingCart, Subscription)
-from api.filters import CookingTimeFilter, IsUsedInRecipesFilter
+from django.contrib.admin import SimpleListFilter
+
+
+class CookingTimeFilter(SimpleListFilter):
+    title = 'Время готовки'
+    parameter_name = 'cooking_time_range'
+
+    def lookups(self, request, model_admin):
+        times = Recipe.objects.all().values_list('cooking_time',
+                                                 flat=True).distinct()
+        if len(times) < 3:
+            return list()
+
+        sorted_times = sorted(times)
+        total = len(sorted_times)
+
+        self.shortest_border = sorted_times[total // 3]
+        self.longest_border = sorted_times[(2 * total) // 3]
+
+        fast = Recipe.objects.filter(cooking_time__lt=self.shortest_border)
+        medium = Recipe.objects.filter(cooking_time__gte=self.shortest_border,
+                                       cooking_time__lt=self.longest_border)
+        long = Recipe.objects.filter(cooking_time__gte=self.longest_border)
+
+        return [
+            ('<', f'Быстрее {self.shortest_border} мин ({fast.count()})'),
+            ('<>', f'Быстрее {self.longest_border} мин ({medium.count()})'),
+            ('>', f'Долго ({long.count()})')
+        ]
+
+    def queryset(self, request, recipes_queryset):
+        if self.value() == '<':
+            return recipes_queryset.filter(
+                cooking_time__lt=self.shortest_border
+            )
+        if self.value() == '<>':
+            return recipes_queryset.filter(
+                cooking_time__gte=self.shortest_border,
+                cooking_time__lt=self.longest_border
+            )
+        if self.value() == '>':
+            return recipes_queryset.filter(
+                cooking_time__gte=self.longest_border
+            )
+        return recipes_queryset
+
+
+class IsUsedInRecipesFilter(SimpleListFilter):
+    title = 'Есть в рецептах'
+    parameter_name = 'is_used_in_recipes'
+    LOOKUP_CHOICES = (
+        ('yes', 'Да'),
+        ('no', 'Нет'),
+    )
+
+    def lookups(self, request, model_admin):
+        return self.LOOKUP_CHOICES
+
+    def queryset(self, request, ingredients_queryset):
+        if self.value() == 'yes':
+            return ingredients_queryset.filter(recipes_count__gt=0)
+        if self.value() == 'no':
+            return ingredients_queryset.filter(recipes_count=0)
+        return ingredients_queryset
 
 
 @admin.register(CustomUser)
