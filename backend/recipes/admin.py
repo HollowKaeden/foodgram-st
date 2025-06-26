@@ -74,6 +74,50 @@ class IsUsedInRecipesFilter(SimpleListFilter):
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
     search_fields = ('email', 'username')
+    list_display = (
+        'id',
+        'username',
+        'full_name',
+        'email',
+        'image_preview',
+        'recipes_count',
+        'subscriptions_count',
+        'subscribers_count',
+    )
+
+    def get_queryset(self, request):
+        self.request = request
+        qs = super().get_queryset(request)
+        qs = qs.annotate(
+            recipes_count=Count('recipes'),
+            subscriptions_count=Count('subscriptions_from'),
+            subscribers_count=Count('subscribers_to')
+        )
+        return qs
+
+    @admin.display(description='ФИО')
+    def full_name(self, user):
+        return f'{user.first_name} {user.last_name}'
+
+    @admin.display(description='Аватар')
+    @mark_safe
+    def image_preview(self, user):
+        if user.avatar:
+            avatar_url = self.request.build_absolute_uri(user.avatar.url)
+            return f'<img src="{avatar_url}" width="100" height="100"/>'
+        return '-'
+
+    @admin.display(description='Кол-во рецептов')
+    def recipes_count(self, user):
+        return user.recipes_count
+
+    @admin.display(description='Кол-во подписок')
+    def subscriptions_count(self, user):
+        return user.subscriptions_count
+
+    @admin.display(description='Кол-во подписчиков')
+    def subscribers_count(self, user):
+        return user.subscribers_count
 
 
 @admin.register(Recipe)

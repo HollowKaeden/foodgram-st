@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.core.files.base import ContentFile
@@ -46,7 +46,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request, pk=None):
         if not Recipe.objects.filter(pk=pk).exists():
-            raise NotFound(f'Рецепт с id={pk} не найден')
+            raise ValidationError(f'Рецепт с id={pk} не найден')
 
         short_path = reverse('short-link', kwargs={'recipe_id': pk})
         short_link = request.build_absolute_uri(short_path)

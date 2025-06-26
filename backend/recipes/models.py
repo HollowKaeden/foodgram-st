@@ -12,7 +12,7 @@ username_validator = RegexValidator(
 
 
 class CustomUser(AbstractUser):
-    username = models.CharField('Имя пользователя', max_length=150,
+    username = models.CharField('Логин (никнейм)', max_length=150,
                                 unique=True, validators=(username_validator,))
     email = models.EmailField('Электронная почта', max_length=254,
                               blank=False, unique=True)
@@ -34,12 +34,12 @@ class Subscription(models.Model):
     subscriber = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='subscriptions'
+        related_name='subscriptions_from'
     )
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='subscribers'
+        related_name='subscriptions_to'
     )
 
     class Meta:
@@ -157,14 +157,14 @@ class UserRecipeLink(models.Model):
 
 
 class Favorite(UserRecipeLink):
-    class Meta:
+    class Meta(UserRecipeLink.Meta):
         verbose_name = 'любимое'
         verbose_name_plural = 'Любимые'
         default_related_name = 'favorites'
 
 
 class ShoppingCart(UserRecipeLink):
-    class Meta:
+    class Meta(UserRecipeLink.Meta):
         verbose_name = 'корзина'
         verbose_name_plural = 'Корзина'
         default_related_name = 'shopping_carts'
