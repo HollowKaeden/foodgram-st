@@ -4,7 +4,7 @@
 
 [Артамонов Иван Алексеевич](https://github.com/HollowKaeden)
 
-Email: Vanya200373@yandex.ru
+Email: [Vanya200373@yandex.ru](mailto:Vanya200373@yandex.ru)
 
 Telegram: [@BlessNT](https://t.me/BlessNT)
 
@@ -57,6 +57,7 @@ docker compose up --build
 
 ### 4. Загрузка ингредиентов
 
+<!-- Не совсем понимаю, что Вы имеете в виду под "новой командой" для импорта из прекода, можете поподробнее описать, что именно нужно сделать? -->
 После запуска контейнеров выполните в корне проекта:
 ```bash
 docker compose exec backend python manage.py loaddata ingredients_fixture.json
@@ -127,6 +128,7 @@ python manage.py migrate
 
 Импортируйте продукты:
 
+<!-- Не совсем понимаю, что Вы имеете в виду под "новой командой" для импорта из прекода, можете поподробнее описать, что именно нужно сделать? -->
 ```bash
 python manage.py loaddata ingredients_fixture.json
 ```
