@@ -145,26 +145,34 @@ class UserRecipeLink(models.Model):
 
     class Meta:
         abstract = True
-        constraints = (
-            models.UniqueConstraint(
-                fields=('user', 'recipe'),
-                name='unique_user_recipe_relation'
-            ),
-        )
 
     def __str__(self):
         return f'{self.user} - {self.recipe.name}'
 
 
+# Наследовать Meta(UserRecipeLink.Meta) не получилось, потому что
+# требуется уникальное имя для каждого UniqueConstraint
 class Favorite(UserRecipeLink):
-    class Meta(UserRecipeLink.Meta):
+    class Meta:
         verbose_name = 'любимое'
         verbose_name_plural = 'Любимые'
         default_related_name = 'favorites'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_user_recipe_favorite'
+            ),
+        )
 
 
 class ShoppingCart(UserRecipeLink):
-    class Meta(UserRecipeLink.Meta):
+    class Meta:
         verbose_name = 'корзина'
         verbose_name_plural = 'Корзина'
         default_related_name = 'shopping_carts'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_user_recipe_shoppingcart'
+            ),
+        )

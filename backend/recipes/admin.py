@@ -89,9 +89,9 @@ class CustomUserAdmin(UserAdmin):
         self.request = request
         qs = super().get_queryset(request)
         qs = qs.annotate(
-            recipes_count=Count('recipes'),
-            subscriptions_count=Count('subscriptions_from'),
-            subscribers_count=Count('subscribers_to')
+            recipes_count=Count('recipes', distinct=True),
+            subscriptions_count=Count('subscriptions_from', distinct=True),
+            subscribers_count=Count('subscriptions_to', distinct=True)
         )
         return qs
 
@@ -104,7 +104,7 @@ class CustomUserAdmin(UserAdmin):
     def image_preview(self, user):
         if user.avatar:
             avatar_url = self.request.build_absolute_uri(user.avatar.url)
-            return f'<img src="{avatar_url}" width="100" height="100"/>'
+            return f'<img src="{avatar_url}" width="50" height="50"/>'
         return '-'
 
     @admin.display(description='Кол-во рецептов')
