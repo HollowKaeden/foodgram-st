@@ -52,7 +52,11 @@ class UserWithRecipesSerializer(UserSerializer):
                                              read_only=True)
 
     def get_recipes(self, author):
-        recipes_limit = self.context.get('recipes_limit')
+        request = self.context.get('request')
+        try:
+            recipes_limit = int(request.query_params.get('recipes_limit'))
+        except (TypeError, ValueError):
+            recipes_limit = None
 
         recipes = author.recipes.all()
         if recipes_limit:
@@ -76,10 +80,6 @@ class UserWithRecipesSerializer(UserSerializer):
             'avatar'
         )
         read_only_fields = fields
-
-
-class SubscriptionQuerySerializer(serializers.Serializer):
-    recipes_limit = serializers.IntegerField(required=False, min_value=1)
 
 
 # Сериализаторы для рецептов и ингредиентов
@@ -172,11 +172,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
-        # Поле author не передаётся при запросе (только request.user),
-        # поэтому задаём его вручную при создании рецепта.
-        # Иначе возникнет ошибка, у рецепта не будет автора.
-        recipe = super().create({**validated_data,
-                                 'author': self.context['request'].user})
+        recipe = super().create(validated_data)
         self.create_ingredients(recipe, ingredients)
         return recipe
 

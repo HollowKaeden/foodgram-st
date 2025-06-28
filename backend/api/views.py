@@ -15,8 +15,7 @@ from api.serializers import (RecipeReadSerializer,
                              RecipeCreateUpdateSerializer,
                              ShortRecipeSerializer,
                              IngredientSerializer,
-                             UserWithRecipesSerializer,
-                             SubscriptionQuerySerializer)
+                             UserWithRecipesSerializer)
 from api.permissions import IsAuthorOrReadOnly
 from api.filters import RecipeFilter, IngredientFilter
 import uuid
@@ -42,6 +41,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         elif self.action == 'favorite':
             return ShortRecipeSerializer
         return RecipeReadSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
     @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request, pk=None):
@@ -149,20 +151,12 @@ class UserViewSet(DjoserUserViewSet):
 
     @action(detail=False, methods=['get'], url_path='subscriptions')
     def subscriptions(self, request):
-        serializer = SubscriptionQuerySerializer(data=request.query_params)
-        serializer.is_valid(raise_exception=True)
-        recipes_limit = serializer.validated_data.get('recipes_limit')
-
         subscriptions = Subscription.objects.filter(subscriber=request.user)
         authors = User.objects.filter(id__in=subscriptions
                                       .values_list('author_id', flat=True))
 
-        context = self.get_serializer_context()
-        # Эта строка не лишняя, без неё не будет работать ограничение
-        # количества рецептов в UserWithRecipesSerializer
-        context['recipes_limit'] = recipes_limit
-
         page = self.paginate_queryset(authors)
+        context = self.get_serializer_context()
         serializer = UserWithRecipesSerializer(page, many=True,
                                                context=context)
         return self.get_paginated_response(serializer.data)
@@ -192,22 +186,15 @@ class UserViewSet(DjoserUserViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        serializer = SubscriptionQuerySerializer(data=request.query_params)
-        serializer.is_valid(raise_exception=True)
-        recipes_limit = serializer.validated_data.get('recipes_limit')
-
         context = self.get_serializer_context()
-        # Эта строка не лишняя, без неё не будет работать ограничение
-        # количества рецептов в UserWithRecipesSerializer
-        context['recipes_limit'] = recipes_limit
-
         serializer = UserWithRecipesSerializer(author, context=context)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
     def delete_subscription(self, request, id=None):
-        user = request.user
-        author = get_object_or_404(User, id=id)
-        get_object_or_404(Subscription,
-                          subscriber=user, author=author).delete()
+        get_object_or_404(
+            Subscription,
+            subscriber=request.user,
+            author_id=id
+        ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
