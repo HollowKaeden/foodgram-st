@@ -107,15 +107,15 @@ class CustomUserAdmin(UserAdmin):
             return f'<img src="{avatar_url}" width="50" height="50"/>'
         return '-'
 
-    @admin.display(description='Кол-во рецептов')
+    @admin.display(description='Рецептов')
     def recipes_count(self, user):
         return user.recipes_count
 
-    @admin.display(description='Кол-во подписок')
+    @admin.display(description='Подписок')
     def subscriptions_count(self, user):
         return user.subscriptions_count
 
-    @admin.display(description='Кол-во подписчиков')
+    @admin.display(description='Подписчиков')
     def subscribers_count(self, user):
         return user.subscribers_count
 
@@ -166,7 +166,7 @@ class IngredientAdmin(admin.ModelAdmin):
         qs = qs.annotate(recipes_count=Count('recipes'))
         return qs
 
-    @admin.display(description='Количество рецептов')
+    @admin.display(description='Рецептов')
     def recipes_count(self, ingredient):
         return ingredient.recipes_count
 
