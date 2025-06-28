@@ -13,13 +13,11 @@ class Command(BaseCommand):
         except FileNotFoundError:
             raise CommandError('Файл ingredients.json не найден')
 
-        count = 0
-        for ingredient in data:
-            name, unit = ingredient.values()
-            _, created = Ingredient.objects.get_or_create(
-                name=name, measurement_unit=unit
-            )
-            if created:
-                count += 1
-        self.stdout.write(self.style.SUCCESS(f'Импортировано {count} '
+        new_ingredients = [Ingredient(**ingredient) for ingredient in data]
+
+        before = Ingredient.objects.count()
+        Ingredient.objects.bulk_create(new_ingredients, ignore_conflicts=True)
+        after = Ingredient.objects.count()
+
+        self.stdout.write(self.style.SUCCESS(f'Импортировано {after - before} '
                                              f'ингредиентов'))
