@@ -57,10 +57,9 @@ docker compose up --build
 
 ### 4. Загрузка ингредиентов
 
-<!-- Не совсем понимаю, что Вы имеете в виду под "новой командой" для импорта из прекода, можете поподробнее описать, что именно нужно сделать? -->
 После запуска контейнеров выполните в корне проекта:
 ```bash
-docker compose exec backend python manage.py loaddata ingredients_fixture.json
+docker compose exec backend python manage.py load_ingredients
 ```
 После выполнения база данных будет заполнена продуктами для рецептов
 
@@ -69,7 +68,7 @@ docker compose exec backend python manage.py loaddata ingredients_fixture.json
 Создайте администратора для входа в админ-панель:
 
 ```bash
-docker-compose exec backend python manage.py createsuperuser
+docker compose exec backend python manage.py createsuperuser
 ```
 
 ### 6. Запуск документации API сервера
@@ -128,9 +127,8 @@ python manage.py migrate
 
 Импортируйте продукты:
 
-<!-- Не совсем понимаю, что Вы имеете в виду под "новой командой" для импорта из прекода, можете поподробнее описать, что именно нужно сделать? -->
 ```bash
-python manage.py loaddata ingredients_fixture.json
+python manage.py load_ingredients
 ```
 
 ### 5. Запуск сервера
