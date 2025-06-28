@@ -124,7 +124,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class UserViewSet(DjoserUserViewSet):
-    @action(detail=False, methods=['put', 'delete'], url_path='me/avatar')
+    @action(detail=False, methods=['put', 'delete'],
+            permission_classes=[IsAuthenticated], url_path='me/avatar')
     def avatar(self, request):
         user = request.user
 
