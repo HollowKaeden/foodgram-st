@@ -3,12 +3,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.throttling import ScopedRateThrottle
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
+from djoser.views import TokenCreateView
 from recipes.models import (Recipe, Ingredient, Favorite,
                             ShoppingCart, Subscription)
 from api.serializers import (RecipeReadSerializer,
@@ -18,6 +20,7 @@ from api.serializers import (RecipeReadSerializer,
                              UserWithRecipesSerializer)
 from api.permissions import IsAuthorOrReadOnly
 from api.filters import RecipeFilter, IngredientFilter
+from api.validators import validate_image_size
 import uuid
 import base64
 
@@ -124,6 +127,13 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class UserViewSet(DjoserUserViewSet):
+    def get_throttles(self):
+        # Ограничиваем только регистрацию; лимит в REGISTER_THROTTLE_RATE.
+        if self.action == 'create':
+            self.throttle_scope = 'register'
+            return [ScopedRateThrottle()]
+        return super().get_throttles()
+
     @action(detail=False, methods=['put', 'delete'],
             permission_classes=[IsAuthenticated], url_path='me/avatar')
     def avatar(self, request):
@@ -139,10 +149,14 @@ class UserViewSet(DjoserUserViewSet):
                 ext = format.split('/')[-1]
                 name = f'{uuid.uuid4()}.{ext}'
                 data = ContentFile(base64.b64decode(imgstr), name=name)
+                validate_image_size(data)
 
                 user.avatar.save(data.name, data, save=True)
                 return Response({'avatar':
                                  request.build_absolute_uri(user.avatar.url)})
+            except ValidationError as error:
+                return Response({'avatar': error.detail},
+                                status=status.HTTP_400_BAD_REQUEST)
             except Exception:
                 return Response({'error': 'Неправильные данные'},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -199,3 +213,9 @@ class UserViewSet(DjoserUserViewSet):
             author_id=id
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ThrottledTokenCreateView(TokenCreateView):
+    """Логин djoser с ограничением попыток (LOGIN_THROTTLE_RATE)."""
+    throttle_classes = (ScopedRateThrottle,)
+    throttle_scope = 'login'

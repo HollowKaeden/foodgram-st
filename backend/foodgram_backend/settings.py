@@ -32,6 +32,18 @@ DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
+# Работа за HTTPS-прокси (прод). Локально переменные не заданы и ничего не меняется.
+# В Django 3.2 CSRF_TRUSTED_ORIGINS - домены без схемы.
+CSRF_TRUSTED_ORIGINS = [
+    origin for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin
+]
+if os.getenv('SECURE_PROXY_SSL_HEADER') == 'True':
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+USE_X_FORWARDED_HOST = os.getenv('USE_X_FORWARDED_HOST') == 'True'
+
 
 AUTH_USER_MODEL = 'recipes.CustomUser'
 
@@ -130,6 +142,15 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
+    # Троттлинг только регистрации и логина (scope задаётся во вьюхах).
+    # Пустая переменная = без ограничений; формат DRF, например 5/hour.
+    'DEFAULT_THROTTLE_RATES': {
+        'register': os.getenv('REGISTER_THROTTLE_RATE') or None,
+        'login': os.getenv('LOGIN_THROTTLE_RATE') or None,
+    },
+    # Сколько прокси перед приложением: по X-Forwarded-For определяется IP клиента.
+    'NUM_PROXIES': (int(os.getenv('NUM_PROXIES'))
+                    if os.getenv('NUM_PROXIES') else None),
 }
 
 
@@ -169,6 +190,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles/static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
+
+# Лимит размера загружаемой картинки (рецепт, аватар) в мегабайтах; 0 = без лимита.
+MAX_IMAGE_SIZE_MB = float(os.getenv('MAX_IMAGE_SIZE_MB', '0'))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

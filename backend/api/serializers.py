@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from djoser.serializers import UserSerializer as DjoserUserSerializer
 from recipes.models import (Recipe, Ingredient, RecipeIngredient,
                             Favorite, ShoppingCart, Subscription)
+from api.validators import validate_image_size
 
 
 User = get_user_model()
@@ -13,7 +14,8 @@ User = get_user_model()
 
 
 class AvatarSerializer(serializers.ModelSerializer):
-    avatar = Base64ImageField(required=True)
+    avatar = Base64ImageField(required=True,
+                              validators=(validate_image_size,))
 
     class Meta:
         model = User
@@ -158,7 +160,8 @@ class IngredientAmountSerializer(serializers.Serializer):
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     ingredients = IngredientAmountSerializer(many=True, required=True)
-    image = Base64ImageField(required=True, allow_null=False)
+    image = Base64ImageField(required=True, allow_null=False,
+                             validators=(validate_image_size,))
     cooking_time = serializers.IntegerField(min_value=1)
 
     def create_ingredients(self, recipe, ingredients):
