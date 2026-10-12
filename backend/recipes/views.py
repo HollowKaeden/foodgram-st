@@ -1,9 +1,9 @@
-from django.shortcuts import redirect
-from rest_framework.exceptions import ValidationError
+from django.shortcuts import get_object_or_404, redirect
 from recipes.models import Recipe
 
 
 def short_recipe_view(request, recipe_id):
-    if not Recipe.objects.filter(id=recipe_id).exists():
-        raise ValidationError(f'Рецепт с id {recipe_id} не найден')
+    # Http404, а не ValidationError из DRF: это обычная Django-вьюха,
+    # исключение DRF здесь никто не обрабатывает, и получался 500.
+    get_object_or_404(Recipe, id=recipe_id)
     return redirect(f'/recipes/{recipe_id}/')
