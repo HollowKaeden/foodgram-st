@@ -11,15 +11,15 @@ COPY frontend/ ./
 RUN npm run build
 
 # 2. Статика Django: админка и DRF (версия Python как в backend/Dockerfile)
-FROM python:3.9.13 AS django-static
+FROM python:3.9.13-slim AS django-static
 WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install -r requirements.txt --no-cache-dir
 COPY backend/ .
 RUN python manage.py collectstatic --noinput
 
-# 3. nginx (версия как в nginx/Dockerfile)
-FROM nginx:1.22.1
+# 3. nginx (версия как в nginx/Dockerfile, сборка alpine: образ в разы меньше)
+FROM nginx:1.22.1-alpine
 COPY gateway/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=frontend /app/build /usr/share/nginx/html
 # Django кладёт admin/ и rest_framework/ в static/, рядом с js/ и css/ фронтенда: имена не пересекаются
