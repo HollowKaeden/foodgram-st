@@ -25,7 +25,10 @@ const About = ({ updateOrders, orders }) => {
               приготовления блюда, просмотреть рецепты друзей и добавить любимые рецепты в список избранных.
             </p>
             <p className={styles.textItem}>
-              Чтобы использовать все возможности сайта — нужна регистрация. Проверка адреса электронной почты не осуществляется, вы можете ввести любой email. 
+              Чтобы использовать все возможности сайта — нужна регистрация. Проверка адреса электронной почты не осуществляется, вы можете ввести любой email.
+            </p>
+            <p className={styles.textItem}>
+              Сейчас сайт работает как живое демо в моём портфолио. Чтобы его не заспамили, регистрация и вход ограничены по частоте, а фото к рецепту не больше 5 МБ.
             </p>
             <p className={styles.textItem}>
               Заходите и делитесь своими любимыми рецептами!
@@ -38,10 +41,10 @@ const About = ({ updateOrders, orders }) => {
           </h2>
           <div className={styles.text}>
             <p className={styles.textItem}>
-              Код проекта находится тут - <a href="#" className={styles.textLink}>Github</a>
+              Код проекта находится тут - <a href="https://github.com/HollowKaeden/foodgram-st" target="_blank" rel="noopener noreferrer" className={styles.textLink}>Github</a>
             </p>
             <p className={styles.textItem}>
-              Автор проекта: <a href="#" className={styles.textLink}>Имя Автора</a>
+              Автор проекта: <a href="https://github.com/HollowKaeden" target="_blank" rel="noopener noreferrer" className={styles.textLink}>Иван Артамонов</a>
             </p>
           </div>
         </aside>
