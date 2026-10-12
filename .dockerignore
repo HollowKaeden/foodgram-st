@@ -1,0 +1,14 @@
+# Для сборок из корня репозитория (gateway/Dockerfile).
+.git
+.github
+**/venv
+**/node_modules
+**/__pycache__
+frontend/build
+backend/media
+backend/db.sqlite3
+**/.env
+data
+docs
+postman_collection
+infra
